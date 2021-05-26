@@ -65,3 +65,8 @@ async function generateHTML(hash, component, exportedName, props) {
 ```
 
 Is there a better way to get the suspense chunks than using react-fragment loader? (unsure what a proper name is for these react-fs, react-pg, ... components).
+
+Here is a rough diagram of how it works
+[Link to the diagram](https://excalidraw.com/#json=6024796181626880,IeUKmgYY92JB15y3kgoFdA)
+
+<img src="/diagram.svg" alt="react-fragment loader diagram" />
