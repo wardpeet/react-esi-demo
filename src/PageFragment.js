@@ -1,8 +1,18 @@
 import * as React from "react";
 import { readFragment } from "./react-fragment";
+import { readFile } from "react-fs";
+import path from "path";
 
 function Server({ component, exportedName, ...props }) {
-  return readFragment(component, exportedName, props);
+  if (process.argv.includes("--esi")) {
+    return readFragment(component, exportedName, props);
+  }
+
+  const output = readFile(
+    path.resolve(process.cwd(), "static/static-html.html")
+  );
+
+  return <div dangerouslySetInnerHTML={{ __html: output }} />;
 }
 
 export function PageFragment({

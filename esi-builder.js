@@ -4,6 +4,10 @@ import * as React from "react";
 import ReactDOMfizz from "react-dom/unstable-fizz.js";
 import globby from "globby";
 
+if (process.argv.includes("--esi")) {
+  console.log(`RUNNING with ESI-support`);
+}
+
 try {
   fs.mkdirSync(path.join(process.cwd(), "public"));
 } catch (err) {}

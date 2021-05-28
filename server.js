@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import polka from "polka";
-import { pipeline } from "stream";
+import { pipeline, Transform } from "stream";
 import got from "got";
 
 const PORT = process.env.PORT || 4000;
@@ -25,32 +25,32 @@ polka()
       return next();
     }
 
-    pipeline(
-      fs.createReadStream(filePath),
-      async function* (source) {
-        source.setEncoding("utf8"); // Work with strings rather than `Buffer`s.
+    const esiToHTML = new Transform({
+      transform: async function (chunk, encoding, next) {
+        const strChunk = chunk.toString();
 
-        for await (const chunk of source) {
-          try {
-            let newChunk = chunk;
-            for (const match of chunk.matchAll(REGEX_ESI)) {
-              newChunk = newChunk.replace(
-                match[0],
-                (await got(`http://localhost:${PORT}${match[1]}`)).body.replace(
-                  "<!DOCTYPE html>",
-                  ""
-                )
-              );
-            }
-
-            yield newChunk;
-          } catch (err) {
-            console.log({ err });
-          }
+        let newChunk = strChunk;
+        for (const match of strChunk.matchAll(REGEX_ESI)) {
+          newChunk = newChunk.replace(
+            match[0],
+            (await got(`http://localhost:${PORT}${match[1]}`)).body.replace(
+              "<!DOCTYPE html>",
+              ""
+            )
+          );
         }
+        this.push(newChunk);
+
+        next();
       },
-      res
-    );
+    });
+
+    pipeline(fs.createReadStream(filePath), esiToHTML, res, (err) => {
+      if (err) {
+        res.statusCode = 500;
+        res.end(err);
+      }
+    });
   })
   .listen(PORT, (err) => {
     if (err) throw err;

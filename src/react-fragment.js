@@ -82,6 +82,7 @@ async function generateHTML(hash, component, exportedName, props) {
     return esiTag;
   }
 
+  console.log(`Generating ${hash}.html ESI from ${component}`);
   const writeStream = createWriteStream(fragmentPath);
   const mod = await import(component);
   const Component = mod[exportedName];
@@ -98,9 +99,7 @@ async function generateHTML(hash, component, exportedName, props) {
     // My guess is that this will become pipeToNodeWritable from Flight to render a Server Render tree,
     // so we can also leverage it on client navigations?
     const { startWriting } = ReactDOMfizz.pipeToNodeWritable(RC, writeStream, {
-      onReadyToStream() {
-        writeStream.write(`<!DOCTYPE html>`);
-      },
+      onReadyToStream() {},
       onCompleteAll: () => {
         startWriting();
       },
